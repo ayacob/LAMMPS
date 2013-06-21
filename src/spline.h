@@ -19,7 +19,7 @@ public:
   virtual void communicate();                                   // Broadcasts the spline function parameters to all processors
 
   friend std::istream& operator>>(std::istream&, Spline&);      // Read in spline from input stream
-  Spline& operator=(const Spline& other);
+  Spline& operator=(const Spline&);
 
 protected:
   int nknots_;

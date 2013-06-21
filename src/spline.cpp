@@ -67,24 +67,24 @@ std::istream& operator>>(std::istream& is, Spline& spline)
 /* ----------------------------------------------------------------------
    overloaded = operator for splines
 ------------------------------------------------------------------------- */
-Spline& Spline::operator=(const Spline& other)
+
+Spline& Spline::operator=(const Spline& rhs)
 {
+  nknots_=rhs.nknots_;
+  resize(); // resize x,y,ypp vectors
 
-  nknots_=other.nknots_;
-  resize();
-
-  yp0_ = other.yp0_;
-  ypn_ = other.ypn_;
-  xmax_shifted_ = other.xmax_shifted_;
+  yp0_ = rhs.yp0_;
+  ypn_ = rhs.ypn_;
 
   for (int k=0; k<nknots_; ++k) {
-
-    x_[k] = other.x_[k];
-    y_[k] = other.y_[k];
-    ypp_[k] = other.ypp_[k];
-
+    x_[k] = rhs.x_[k];
+    y_[k] = rhs.y_[k];
+    ypp_[k] = rhs.ypp_[k];
   }
 
+  rehash(); // setup xmaxshift, step, and invstep
+
+  return *this;
 }
 
 /* ----------------------------------------------------------------------
