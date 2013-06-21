@@ -79,7 +79,7 @@ void PairEAMAlloySpline::compute(int eflag, int vflag)
     double xtmp = x[i][0];
     double ytmp = x[i][1];
     double ztmp = x[i][2];
-    int itype = type[i]-1;			// shifted back for reference to arrays of Splines
+    int itype = type[i]-1;      // shifted back for reference to arrays of Splines
     double rhovalue = 0;
 
     int n2 = 0; // keep count of 2-body pair info for atom ii
@@ -87,9 +87,9 @@ void PairEAMAlloySpline::compute(int eflag, int vflag)
     // Two-body interactions
     int *jlist = firstneigh[i];
     int jnum = numneigh[i];
-    for (int jj = 0; jj < jnum; ++jj) {		//loop over neighbors
+    for (int jj = 0; jj < jnum; ++jj) {    //loop over neighbors
       int j = jlist[jj];
-      int jtype = type[j]-1;			// species of current neighbor. shifted back for reference to arrays
+      int jtype = type[j]-1;      // species of current neighbor. shifted back for reference to arrays
       int phi_col = itype*ntypes + jtype;
       double delx = x[j][0] - xtmp;
       double dely = x[j][1] - ytmp;
@@ -105,7 +105,7 @@ void PairEAMAlloySpline::compute(int eflag, int vflag)
           // Compute phi(r_ij) and its gradient in one step
           double phigrad;
           double phival = 0.5 * phi[phi_col].splint_comb(r, phigrad);
-			// note that atom types begin with 1, while vector elements begin with 0, hence jtype-1
+          // note that atom types begin with 1, while vector elements begin with 0, hence jtype-1
 
           // Only half of the gradient contributes to the force as
           // well as half of the energy since we are double counting
@@ -300,7 +300,7 @@ void PairEAMAlloySpline::init_style()
 
 double PairEAMAlloySpline::init_one(int i, int j)
 {
-	return cutoff_max;
+  return cutoff_max;
 }
 
 /* ----------------------------------------------------------------------
@@ -328,14 +328,14 @@ void PairEAMAlloySpline::read_file(std::string filename)
     int ntypes = atom->ntypes;
 
     // Read in phi: phi_aa, phi_ab, phi_ba, phi_bb
-    int nphi = 2 * ntypes;
+    int nphi = ntypes * ntypes;
     phi.resize(nphi, Spline(lmp));
     for (int i = 0; i < ntypes; ++i) {
       for (int j = i; j < ntypes; ++j) {
         ifs >> phi[i*ntypes + j];
 
         // keep symmetry: phi_ij = phi_ji
-	if ( i != j ) phi[j*ntypes + i] = phi[i*ntypes + j];
+  if ( i != j ) phi[j*ntypes + i] = phi[i*ntypes + j];
       }
     }
 

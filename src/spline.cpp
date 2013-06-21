@@ -37,15 +37,15 @@ double Spline::get_cutoff() const
 
 void Spline::communicate()
 {
-	MPI_Bcast(&nknots_, 1, MPI_INT, 0, world);
-	MPI_Bcast(&yp0_, 1, MPI_DOUBLE, 0, world);
-	MPI_Bcast(&ypn_, 1, MPI_DOUBLE, 0, world);
-	if(comm->me != 0)
+  MPI_Bcast(&nknots_, 1, MPI_INT, 0, world);
+  MPI_Bcast(&yp0_, 1, MPI_DOUBLE, 0, world);
+  MPI_Bcast(&ypn_, 1, MPI_DOUBLE, 0, world);
+  if(comm->me != 0)
     resize(); // resize vectors that make up spline using nknots_
-	MPI_Bcast(&x_[0], nknots_, MPI_DOUBLE, 0, world);
-	MPI_Bcast(&y_[0], nknots_, MPI_DOUBLE, 0, world);
-	MPI_Bcast(&ypp_[0], nknots_, MPI_DOUBLE, 0, world);
-	if(comm->me != 0)
+  MPI_Bcast(&x_[0], nknots_, MPI_DOUBLE, 0, world);
+  MPI_Bcast(&y_[0], nknots_, MPI_DOUBLE, 0, world);
+  MPI_Bcast(&ypp_[0], nknots_, MPI_DOUBLE, 0, world);
+  if(comm->me != 0)
     rehash(); // setup spline
   return;
 }
