@@ -1,24 +1,26 @@
 #ifndef SPLINE_H
 #define SPLINE_H
 
-#include "pointers.h"
+#include "comm.h"
+#include "mpi.h"
 
 #include <vector>
 #include <istream>
 
 namespace LAMMPS_NS {
 
-class Spline : protected Pointers
+class Spline
 {
 public:
-  Spline(class LAMMPS *);
+  Spline();
+  Spline(const Spline&);
   virtual ~Spline();
 
-  double get_cutoff() const;                                    // Get radial cutoff of spline (basically last knot)
-  virtual double splint_comb(double, double&) const;            // Interpolate fn & grad from splines given knot_idx
-  virtual void communicate();                                   // Broadcasts the spline function parameters to all processors
+  double get_cutoff() const;                                 // Get radial cutoff of spline (basically last knot)
+  virtual double splint_comb(double, double&) const;         // Interpolate fn & grad from splines given knot_idx
+  virtual void communicate(Comm* &, MPI_Comm&);              // Broadcasts the spline function parameters to all processors
 
-  friend std::istream& operator>>(std::istream&, Spline&);      // Read in spline from input stream
+  friend std::istream& operator>>(std::istream&, Spline&);   // Read in spline from input stream
   Spline& operator=(const Spline&);
 
 protected:

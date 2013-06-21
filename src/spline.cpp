@@ -1,6 +1,6 @@
 #include "spline.h"
 #include "comm.h"
-#include "error.h"
+#include "error_spline.h"
 
 #include "mpi.h"
 #include <string>
@@ -10,9 +10,28 @@ using namespace LAMMPS_NS;
 
 /* ---------------------------------------------------------------------- */
 
-Spline::Spline(class LAMMPS *lmp) : Pointers(lmp), nknots_(0), yp0_(0), ypn_(0), xmax_shifted_(0), step_(0), invstep_(0)
+Spline::Spline() : nknots_(0), yp0_(0), ypn_(0), xmax_shifted_(0), step_(0), invstep_(0)
 {
   // ctor
+}
+
+/* ---------------------------------------------------------------------- */
+
+Spline::Spline(const Spline& spline)
+{
+  nknots_ = spline.nknots_;
+  resize(); // resize x,y,ypp vectors
+
+  yp0_ = spline.yp0_;
+  ypn_ = spline.ypn_;
+
+  for (int k=0; k<nknots_; ++k) {
+    x_[k] = spline.x_[k];
+    y_[k] = spline.y_[k];
+    ypp_[k] = spline.ypp_[k];
+  }
+
+  rehash(); // setup xmaxshift, step, and invstep
 }
 
 /* ---------------------------------------------------------------------- */
@@ -35,7 +54,7 @@ double Spline::get_cutoff() const
    Broadcasts the spline function parameters to all processors
 ------------------------------------------------------------------------- */
 
-void Spline::communicate()
+void Spline::communicate(Comm* &comm, MPI_Comm& world)
 {
   MPI_Bcast(&nknots_, 1, MPI_INT, 0, world);
   MPI_Bcast(&yp0_, 1, MPI_DOUBLE, 0, world);
@@ -65,12 +84,12 @@ std::istream& operator>>(std::istream& is, Spline& spline)
 } // LAMMPS_NS
 
 /* ----------------------------------------------------------------------
-   overloaded = operator for splines
+   Assignment operator for splines
 ------------------------------------------------------------------------- */
 
 Spline& Spline::operator=(const Spline& rhs)
 {
-  nknots_=rhs.nknots_;
+  nknots_ = rhs.nknots_;
   resize(); // resize x,y,ypp vectors
 
   yp0_ = rhs.yp0_;
@@ -96,7 +115,7 @@ void Spline::read(std::istream& is)
   // 1st line lists # knots
   is >> nknots_;
   if (nknots_ < 2)
-    error->one(FLERR,"Invalid number of spline knots in potential file");
+    throw ErrorSpline("Invalid number of spline knots in potential file");
 
   // Resize spline using nknots_
   resize();
@@ -118,7 +137,7 @@ void Spline::read(std::istream& is)
     line_str >> x_[k] >> y_[k] >> ypp_[k];
 
     if (line_str.fail())
-      error->one(FLERR,"Invalid knot line in potential file");
+      throw ErrorSpline("Invalid knot line in potential file");
   }
 
   // Setup spline

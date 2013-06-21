@@ -7,6 +7,7 @@
 #include "neigh_request.h"
 #include "force.h"
 #include "comm.h"
+#include "error_spline.h"
 
 #include <sstream>
 #include <fstream>
@@ -328,38 +329,59 @@ void PairEAMAlloySpline::read_file(std::string filename)
     int ntypes = atom->ntypes;
 
     // Read in phi: phi_aa, phi_ab, phi_ba, phi_bb
-    int nphi = ntypes * ntypes;
-    phi.resize(nphi, Spline(lmp));
-    for (int i = 0; i < ntypes; ++i) {
-      for (int j = i; j < ntypes; ++j) {
-        ifs >> phi[i*ntypes + j];
+    try {
+      int nphi = ntypes * ntypes;
+      phi.resize(nphi);
+      for (int i = 0; i < ntypes; ++i) {
+        for (int j = i; j < ntypes; ++j) {
+          ifs >> phi[i*ntypes + j];
 
-        // keep symmetry: phi_ij = phi_ji
-  if ( i != j ) phi[j*ntypes + i] = phi[i*ntypes + j];
+          // keep symmetry: phi_ij = phi_ji
+          if ( i != j ) phi[j*ntypes + i] = phi[i*ntypes + j];
+        }
       }
+    } catch(ErrorSpline& ex) {
+      std::stringstream oss;
+      oss << ex.what() << " - pot=phi file=" << filename;
+      std::string error_str = oss.str();
+      error->one(FLERR,error_str.c_str());
     }
 
     // Read in rho: rho_a, rho_b
-    int nrho = ntypes;
-    rho.resize(nrho, Spline(lmp));
-    for (int i = 0; i < nrho; ++i) {
-      ifs >> rho[i];
+    try {
+      int nrho = ntypes;
+      rho.resize(nrho);
+      for (int i = 0; i < nrho; ++i) {
+        ifs >> rho[i];
+      }
+    } catch(ErrorSpline& ex) {
+      std::stringstream oss;
+      oss << ex.what() << " - pot=rho file=" << filename;
+      std::string error_str = oss.str();
+      error->one(FLERR,error_str.c_str());
     }
 
     // Read in U: U_a, U_b
-    int nu = ntypes;
-    u.resize(nu, Spline(lmp));
-    for (int i = 0; i < nu; ++i) {
-      ifs >> u[i];
+    try {
+      int nu = ntypes;
+      u.resize(nu);
+      for (int i = 0; i < nu; ++i) {
+        ifs >> u[i];
+      }
+    } catch(ErrorSpline& ex) {
+      std::stringstream oss;
+      oss << ex.what() << " - pot=u file=" << filename;
+      std::string error_str = oss.str();
+      error->one(FLERR,error_str.c_str());
     }
 
     ifs.close();
   }
 
   // Communicate potentials
-  for (int i = 0; i < phi.size(); ++i) phi[i].communicate();
-  for (int i = 0; i < rho.size(); ++i) rho[i].communicate();
-  for (int i = 0; i < u.size();   ++i) u[i].communicate();
+  for (int i = 0; i < phi.size(); ++i) phi[i].communicate(comm, world);
+  for (int i = 0; i < rho.size(); ++i) rho[i].communicate(comm, world);
+  for (int i = 0; i < u.size();   ++i) u[i].communicate(comm, world);
 
   // Determine maximum cutoff radius of all relevant spline functions
   cutoff_max = 0.0;
