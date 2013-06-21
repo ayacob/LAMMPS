@@ -1,11 +1,11 @@
 #ifdef PAIR_CLASS
 
-PairStyle(eam/spline,PairEAMSpline)
+PairStyle(eam/alloy/spline,PairEAMAlloySpline)
 
 #else
 
-#ifndef LMP_PAIR_EAM_SPLINE_H
-#define LMP_PAIR_EAM_SPLINE_H
+#ifndef LMP_PAIR_EAM_ALLOY_SPLINE_H
+#define LMP_PAIR_EAM_ALLOY_SPLINE_H
 
 #include "pair.h"
 #include "spline.h"
@@ -16,11 +16,11 @@ PairStyle(eam/spline,PairEAMSpline)
 
 namespace LAMMPS_NS {
 
-class PairEAMSpline : public Pair
+class PairEAMAlloySpline : public Pair
 {
 public:
-  PairEAMSpline(class LAMMPS *);
-  virtual ~PairEAMSpline();
+  PairEAMAlloySpline(class LAMMPS *);
+  virtual ~PairEAMAlloySpline();
 
   virtual void compute(int, int);
   void allocate();
@@ -39,7 +39,6 @@ protected:
   double cutoff_max;
 
   virtual void read_file(std::string);    // Read in potential from file
-  virtual void read_file_alloy(std::string); // read binary alloy potential file
 
 private:
   struct EAM2Body {
@@ -52,9 +51,9 @@ private:
   std::vector<std::string> map_atom_type;
   std::map<std::string, int> elements;
 
-};  // PairEAMSpline
+};  // PairEAMAlloySpline
 
 } // LAMMPS_NS
 
-#endif  // LMP_PAIR_EAM_SPLINE_H
+#endif  // LMP_PAIR_EAM_ALLOY_SPLINE_H
 #endif  // PAIR_CLASS

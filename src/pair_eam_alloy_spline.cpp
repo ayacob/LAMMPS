@@ -16,7 +16,7 @@ using namespace LAMMPS_NS;
 
 /* ---------------------------------------------------------------------- */
 
-PairEAMSpline::PairEAMSpline(LAMMPS *lmp) : Pair(lmp), cutoff_max(0.0)
+PairEAMAlloySpline::PairEAMAlloySpline(LAMMPS *lmp) : Pair(lmp), cutoff_max(0.0)
 {
   single_enable = 0;        // 1 if single() routine exists
   restartinfo = 0;          // 1 if pair style writes restart info
@@ -28,7 +28,7 @@ PairEAMSpline::PairEAMSpline(LAMMPS *lmp) : Pair(lmp), cutoff_max(0.0)
 
 /* ---------------------------------------------------------------------- */
 
-PairEAMSpline::~PairEAMSpline()
+PairEAMAlloySpline::~PairEAMAlloySpline()
 {
   if (allocated) {
     memory->destroy(setflag);
@@ -40,7 +40,7 @@ PairEAMSpline::~PairEAMSpline()
    Compute energy, stresses, and forces
 ------------------------------------------------------------------------- */
 
-void PairEAMSpline::compute(int eflag, int vflag)
+void PairEAMAlloySpline::compute(int eflag, int vflag)
 {
   if (eflag || vflag) ev_setup(eflag, vflag);
   else evflag = vflag_fdotr = eflag_global = vflag_global = eflag_atom = vflag_atom = 0;
@@ -187,7 +187,7 @@ void PairEAMSpline::compute(int eflag, int vflag)
 
 /* ---------------------------------------------------------------------- */
 
-void PairEAMSpline::allocate()
+void PairEAMAlloySpline::allocate()
 {
   allocated = 1;
   int n = atom->ntypes;
@@ -200,7 +200,7 @@ void PairEAMSpline::allocate()
    Global settings
 ------------------------------------------------------------------------- */
 
-void PairEAMSpline::settings(int narg, char **arg)
+void PairEAMAlloySpline::settings(int narg, char **arg)
 {
   if(narg != 0) error->all(FLERR,"Illegal pair_style command");
   return;
@@ -210,7 +210,7 @@ void PairEAMSpline::settings(int narg, char **arg)
    set coeffs for one or more type pairs
 ------------------------------------------------------------------------- */
 
-void PairEAMSpline::coeff(int narg, char **arg)
+void PairEAMAlloySpline::coeff(int narg, char **arg)
 {
   std::vector<std::string> args(narg);
   for (int i = 0; i < narg; ++i) args[i] = arg[i];
@@ -283,7 +283,7 @@ void PairEAMSpline::coeff(int narg, char **arg)
    Init specific to this pair style
 ------------------------------------------------------------------------- */
 
-void PairEAMSpline::init_style()
+void PairEAMAlloySpline::init_style()
 {
   if(force->newton_pair == 0)
     error->all(FLERR,"Pair style eam/spline requires newton pair on");
@@ -298,7 +298,7 @@ void PairEAMSpline::init_style()
    Init for one type pair i,j and corresponding j,i
 ------------------------------------------------------------------------- */
 
-double PairEAMSpline::init_one(int i, int j)
+double PairEAMAlloySpline::init_one(int i, int j)
 {
 	return cutoff_max;
 }
@@ -307,7 +307,7 @@ double PairEAMSpline::init_one(int i, int j)
    Set coeffs for one or more type pairs
 ------------------------------------------------------------------------- */
 
-void PairEAMSpline::read_file(std::string filename)
+void PairEAMAlloySpline::read_file(std::string filename)
 {
   if(comm->me == 0) {
     std::ifstream ifs;
