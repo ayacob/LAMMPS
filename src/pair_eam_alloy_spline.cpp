@@ -325,54 +325,72 @@ void PairEAMAlloySpline::read_file(std::string filename)
     std::string tmp_line;
     std::getline(ifs, tmp_line);
 
+    // Read in potential type
+    // WARNING: For now this is useless except for testing scripts
+    std::string pot_type;
+    ifs >> pot_type;
+    int nfns = 0;
+
     // Read in potentials
     int ntypes = atom->ntypes;
 
     // Read in phi: phi_aa, phi_ab, phi_ba, phi_bb
-    try {
-      int nphi = ntypes * ntypes;
-      phi.resize(nphi);
-      for (int i = 0; i < ntypes; ++i) {
-        for (int j = i; j < ntypes; ++j) {
+    int nphi = ntypes * ntypes;
+    phi.resize(nphi);
+    for (int i = 0; i < ntypes; ++i) {
+      for (int j = i; j < ntypes; ++j) {
+        // Try reading in basis function
+        try {
+          std::string basis_type;
+          ifs >> basis_type;
           ifs >> phi[i*ntypes + j];
-
-          // keep symmetry: phi_ij = phi_ji
-          if ( i != j ) phi[j*ntypes + i] = phi[i*ntypes + j];
+          ++nfns; // count number of fns in potential
+        } catch(ErrorSpline& ex) {
+          std::stringstream oss;
+          oss << ex.what() << " - pot=" << nfns << " file=" << filename;
+          std::string error_str = oss.str();
+          error->one(FLERR,error_str.c_str());
         }
+
+        // keep symmetry: phi_ij = phi_ji
+        if ( i != j ) phi[j*ntypes + i] = phi[i*ntypes + j];
       }
-    } catch(ErrorSpline& ex) {
-      std::stringstream oss;
-      oss << ex.what() << " - pot=phi file=" << filename;
-      std::string error_str = oss.str();
-      error->one(FLERR,error_str.c_str());
     }
 
     // Read in rho: rho_a, rho_b
-    try {
-      int nrho = ntypes;
-      rho.resize(nrho);
-      for (int i = 0; i < nrho; ++i) {
+    int nrho = ntypes;
+    rho.resize(nrho);
+    for (int i = 0; i < nrho; ++i) {
+      // Try reading in basis function
+      try {
+        std::string basis_type;
+        ifs >> basis_type;
         ifs >> rho[i];
+        ++nfns; // count number of fns in potential
+      } catch(ErrorSpline& ex) {
+        std::stringstream oss;
+        oss << ex.what() << " - pot=" << nfns << " file=" << filename;
+        std::string error_str = oss.str();
+        error->one(FLERR,error_str.c_str());
       }
-    } catch(ErrorSpline& ex) {
-      std::stringstream oss;
-      oss << ex.what() << " - pot=rho file=" << filename;
-      std::string error_str = oss.str();
-      error->one(FLERR,error_str.c_str());
     }
 
     // Read in U: U_a, U_b
-    try {
-      int nu = ntypes;
-      u.resize(nu);
-      for (int i = 0; i < nu; ++i) {
+    int nu = ntypes;
+    u.resize(nu);
+    for (int i = 0; i < nu; ++i) {
+      // Try reading in basis function
+      try {
+        std::string basis_type;
+        ifs >> basis_type;
         ifs >> u[i];
+        ++nfns; // count number of fns in potential
+      } catch(ErrorSpline& ex) {
+        std::stringstream oss;
+        oss << ex.what() << " - pot=" << nfns << " file=" << filename;
+        std::string error_str = oss.str();
+        error->one(FLERR,error_str.c_str());
       }
-    } catch(ErrorSpline& ex) {
-      std::stringstream oss;
-      oss << ex.what() << " - pot=u file=" << filename;
-      std::string error_str = oss.str();
-      error->one(FLERR,error_str.c_str());
     }
 
     ifs.close();
