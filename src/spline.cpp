@@ -123,9 +123,8 @@ void Spline::read(std::istream& is)
   // 2nd line lists first and 2nd derivs
   is >> yp0_ >> ypn_;
 
-  // 3rd line is garbage line
+  // eat up trailing newline character using getline
   std::string tmp_line;
-  std::getline(is, tmp_line);
   std::getline(is, tmp_line);
 
   // Read in knots
@@ -164,8 +163,10 @@ void Spline::resize()
 
 void Spline::rehash()
 {
-  xmax_shifted_ = x_[nknots_-1] - x_[0];
-  step_ = x_[1] - x_[0];
-  invstep_ = 1.0/step_;
+  if (nknots_ > 1) {
+    xmax_shifted_ = x_[nknots_-1] - x_[0];
+    step_ = x_[1] - x_[0];
+    invstep_ = 1.0/step_;
+  }
   return;
 }
